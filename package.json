@@ -1,0 +1,31 @@
+{
+  "name": "blogapp-backend",
+  "version": "1.0.0",
+  "description": "\"This is the backend for the my blogg app\"",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "keywords": [
+    "Blog",
+    "App",
+    "Blog",
+    "Blogging"
+  ],
+  "author": "Sachin Kumar",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.12.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "moment-timezone": "^0.6.0",
+    "mongoose": "^8.19.0",
+    "morgan": "^1.10.1",
+    "winston": "^3.18.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

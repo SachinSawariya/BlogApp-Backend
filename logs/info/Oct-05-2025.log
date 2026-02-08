@@ -1,0 +1,85 @@
+info: Oct-05-2025 17:00:25: 	Server is running on port 9876
+warn: Oct-05-2025 17:00:25: 	shopData Database - disconnected. Retrying...
+error: Oct-05-2025 17:00:25: 	shopData Database - Error:Error: querySrv ENOTFOUND _mongodb._tcp.cluster0.n5feufd.mongodb.net
+info: Oct-05-2025 17:26:28: 	Server is running on port 9876
+warn: Oct-05-2025 17:26:28: 	shopData Database - disconnected. Retrying...
+error: Oct-05-2025 17:26:28: 	shopData Database - Error:Error: querySrv ENOTFOUND _mongodb._tcp.cluster0.n5feufd.mongodb.net
+info: Oct-05-2025 17:52:43: 	Server is running on port 9876
+warn: Oct-05-2025 17:52:49: 	shopData Database - disconnected. Retrying...
+error: Oct-05-2025 17:52:49: 	shopData Database - Error:MongoServerError: bad auth : authentication failed
+info: Oct-05-2025 17:53:16: 	Server is running on port 9876
+warn: Oct-05-2025 17:53:16: 	shopData Database - disconnected. Retrying...
+error: Oct-05-2025 17:53:16: 	shopData Database - Error:Error: querySrv ENOTFOUND _mongodb._tcp.3832
+info: Oct-05-2025 17:55:44: 	Server is running on port 9876
+warn: Oct-05-2025 17:55:45: 	blogApplication Database - disconnected. Retrying...
+error: Oct-05-2025 17:55:45: 	blogApplication Database - Error:Error: querySrv ENOTFOUND _mongodb._tcp.3832
+info: Oct-05-2025 17:56:07: 	Server is running on port 9876
+warn: Oct-05-2025 17:56:07: 	blogApplication Database - disconnected. Retrying...
+error: Oct-05-2025 17:56:07: 	blogApplication Database - Error:Error: querySrv ENOTFOUND _mongodb._tcp.3832
+info: Oct-05-2025 17:56:12: 	Server is running on port 9876
+warn: Oct-05-2025 17:56:12: 	blogApplication Database - disconnected. Retrying...
+error: Oct-05-2025 17:56:12: 	blogApplication Database - Error:Error: querySrv ENOTFOUND _mongodb._tcp.3832
+info: Oct-05-2025 17:56:13: 	Server is running on port 9876
+warn: Oct-05-2025 17:56:14: 	blogApplication Database - disconnected. Retrying...
+error: Oct-05-2025 17:56:14: 	blogApplication Database - Error:Error: querySrv ENOTFOUND _mongodb._tcp.3832
+info: Oct-05-2025 17:56:15: 	Server is running on port 9876
+warn: Oct-05-2025 17:56:16: 	blogApplication Database - disconnected. Retrying...
+error: Oct-05-2025 17:56:16: 	blogApplication Database - Error:Error: querySrv ENOTFOUND _mongodb._tcp.3832
+info: Oct-05-2025 17:56:48: 	Server is running on port 9876
+warn: Oct-05-2025 17:56:49: 	blogApplication Database - disconnected. Retrying...
+error: Oct-05-2025 17:56:49: 	blogApplication Database - Error:Error: querySrv ENOTFOUND _mongodb._tcp.3832
+info: Oct-05-2025 17:57:11: 	Server is running on port 9876
+warn: Oct-05-2025 17:57:11: 	blogApplication Database - disconnected. Retrying...
+error: Oct-05-2025 17:57:11: 	blogApplication Database - Error:Error: querySrv ESERVFAIL _mongodb._tcp.3832
+info: Oct-05-2025 17:57:15: 	Server is running on port 9876
+warn: Oct-05-2025 17:57:16: 	blogApplication Database - disconnected. Retrying...
+error: Oct-05-2025 17:57:16: 	blogApplication Database - Error:Error: querySrv ENOTFOUND _mongodb._tcp.3832
+info: Oct-05-2025 17:57:17: 	Server is running on port 9876
+warn: Oct-05-2025 17:57:18: 	blogApplication Database - disconnected. Retrying...
+error: Oct-05-2025 17:57:18: 	blogApplication Database - Error:Error: querySrv ENOTFOUND _mongodb._tcp.3832
+info: Oct-05-2025 17:57:20: 	Server is running on port 9876
+warn: Oct-05-2025 17:57:20: 	blogApplication Database - disconnected. Retrying...
+error: Oct-05-2025 17:57:20: 	blogApplication Database - Error:Error: querySrv ENOTFOUND _mongodb._tcp.3832
+info: Oct-05-2025 18:00:12: 	Server is running on port 9876
+info: Oct-05-2025 18:02:45: 	Server is running on port 9876
+info: Oct-05-2025 18:05:17: 	Server is running on port 9876
+warn: Oct-05-2025 18:05:17: 	blogApplication Database - disconnected. Retrying...
+error: Oct-05-2025 18:05:17: 	blogApplication Database - Error:Error: querySrv ENOTFOUND _mongodb._tcp.3832
+info: Oct-05-2025 18:06:20: 	Server is running on port 9876
+warn: Oct-05-2025 18:06:20: 	blogApplication Database - disconnected. Retrying...
+error: Oct-05-2025 18:06:20: 	blogApplication Database - Error:Error: querySrv ENOTFOUND _mongodb._tcp.3832
+info: Oct-05-2025 18:20:58: 	Server is running on port 9876
+warn: Oct-05-2025 18:20:58: 	blogApplication Database - disconnected. Retrying...
+error: Oct-05-2025 18:20:58: 	blogApplication Database - Error:Error: querySrv ENOTFOUND _mongodb._tcp.3832
+info: Oct-05-2025 18:23:33: 	Server is running on port 9876
+info: Oct-05-2025 18:23:33: 	Connected to blogApplication Database 🙌
+info: Oct-05-2025 18:23:43: 	Server is running on port 9876
+info: Oct-05-2025 18:23:44: 	Connected to blogApplication Database 🙌
+info: Oct-05-2025 18:36:50: 	Server is running on port 9876
+info: Oct-05-2025 18:36:51: 	Connected to blogApplication Database 🙌
+info: Oct-05-2025 18:40:06: 	Server is running on port 9876
+info: Oct-05-2025 18:40:22: 	Server is running on port 9876
+info: Oct-05-2025 18:40:22: 	Connected to blogApplication Database 🙌
+info: Oct-05-2025 18:40:45: 	Server is running on port 9876
+info: Oct-05-2025 18:40:45: 	Connected to blogApplication Database 🙌
+info: Oct-05-2025 18:40:48: 	Server is running on port 9876
+info: Oct-05-2025 18:40:49: 	Connected to blogApplication Database 🙌
+info: Oct-05-2025 18:41:01: 	Server is running on port 9876
+info: Oct-05-2025 18:41:02: 	Connected to blogApplication Database 🙌
+info: Oct-05-2025 18:41:45: 	Server is running on port 9876
+info: Oct-05-2025 18:41:46: 	Connected to blogApplication Database 🙌
+info: Oct-05-2025 18:42:16: 	Server is running on port 9876
+info: Oct-05-2025 18:42:17: 	Connected to blogApplication Database 🙌
+error: Oct-05-2025 18:42:21: 	utils is not defined
+info: Oct-05-2025 18:43:29: 	Server is running on port 9876
+info: Oct-05-2025 18:43:29: 	Connected to blogApplication Database 🙌
+info: Oct-05-2025 18:44:14: 	Server is running on port 9876
+info: Oct-05-2025 18:44:15: 	Connected to blogApplication Database 🙌
+info: Oct-05-2025 19:11:51: 	Server is running on port 9876
+info: Oct-05-2025 19:11:52: 	Connected to blogApplication Database 🙌
+info: Oct-05-2025 19:12:32: 	Server is running on port 9876
+info: Oct-05-2025 19:12:32: 	Connected to blogApplication Database 🙌
+info: Oct-05-2025 19:14:02: 	Server is running on port 9876
+info: Oct-05-2025 19:14:02: 	Connected to blogApplication Database 🙌
+info: Oct-05-2025 19:14:03: 	Server is running on port 9876
+info: Oct-05-2025 19:14:04: 	Connected to blogApplication Database 🙌

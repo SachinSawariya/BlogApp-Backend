@@ -1,0 +1,12 @@
+info: Nov-30-2025 23:08:49: 	Server is running on port 9876
+info: Nov-30-2025 23:08:55: 	Server is running on port 9876
+info: Nov-30-2025 23:10:33: 	Server is running on port 9876
+warn: Nov-30-2025 23:11:03: 	blogApplication Database - disconnected. Retrying...
+error: Nov-30-2025 23:11:03: 	blogApplication Database - Error:MongoServerSelectionError: 804C494714760000:error:0A000438:SSL routines:ssl3_read_bytes:tlsv1 alert internal error:../deps/openssl/openssl/ssl/record/rec_layer_s3.c:1605:SSL alert number 80
+
+info: Nov-30-2025 23:11:41: 	Server is running on port 9876
+info: Nov-30-2025 23:11:42: 	Connected to blogApplication Database 🙌
+info: Nov-30-2025 23:13:09: 	Server is running on port 9876
+info: Nov-30-2025 23:13:09: 	Connected to blogApplication Database 🙌
+info: Nov-30-2025 23:13:19: 	Server is running on port 9876
+info: Nov-30-2025 23:13:19: 	Connected to blogApplication Database 🙌
