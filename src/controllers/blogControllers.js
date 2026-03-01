@@ -11,6 +11,14 @@ const getSections = asyncHandler(async (req, res) => {
   }
 });
 
+const getFeaturedArticles = asyncHandler(async (req, res) => {
+  const result = await blogSevice.getFeaturedArticles(req, res);
+  if (result?.length > 0) {
+    return utils.successResponse(result, res);
+  } else {
+    return utils.recordNotFound(res, null);
+  }
+});
 
 const getBlogList = asyncHandler(async (req, res) => {
   const result = await blogSevice.getAllBlogs(req, res);
@@ -34,6 +42,7 @@ const getArticlesByCategory = asyncHandler(async (req, res) => {
 
 module.exports = {
   getSections,
+  getFeaturedArticles,
   getBlogList,
   getArticlesByCategory,
 };

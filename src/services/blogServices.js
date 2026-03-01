@@ -74,7 +74,69 @@ const getAllSections = async (req, res) => {
   }
 };
 
+const getFeaturedArticles = async (req, res) => {
+  try {
+    const { Blog, Category } = global.connections.models;
+    
+    // Get featured articles (latest 8 articles across all categories)
+    const featuredArticles = await Blog.aggregate([
+      // 1️⃣ Sort by latest first and likes (for better featured selection)
+      {
+        $addFields: {
+          score: {
+            $add: [
+              { $multiply: ["$likes", 2] }, // Likes weighted more
+              { $divide: [{ $subtract: [new Date(), "$createdAt"] }, 1000 * 60 * 60 * 24] } // Recency factor
+            ]
+          }
+        }
+      },
+      
+      // 2️⃣ Sort by score (likes + recency)
+      {
+        $sort: { score: -1, createdAt: -1 }
+      },
+      
+      // 3️⃣ Limit to 8 articles
+      {
+        $limit: 8
+      },
+      
+      // 4️⃣ Lookup category
+      {
+        $lookup: {
+          from: "categories",
+          localField: "categoryId",
+          foreignField: "_id",
+          as: "category"
+        }
+      },
+      
+      { $unwind: "$category" },
+      
+      // 5️⃣ Project final structure
+      {
+        $project: {
+          id: "$_id",
+          title: 1,
+          slug: 1,
+          content: 1,
+          category: "$category.name",
+          readTime: 1,
+          imageUrl: "$coverImage",
+          likes: 1,
+          createdAt: 1,
+          views: 1
+        }
+      }
+    ]);
 
+    return featuredArticles;
+  } catch (error) {
+    logger.error("Error while fetching featured articles ->", error);
+    throw new Error(error.message);
+  }
+};
 
 const getAllBlogs = async (req, res) => {
   try {
@@ -137,5 +199,6 @@ const getArticlesByCategory = async (req, res) => {
 module.exports = {
   getAllBlogs,
   getAllSections,
+  getFeaturedArticles,
   getArticlesByCategory
 };

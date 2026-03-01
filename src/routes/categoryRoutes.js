@@ -7,6 +7,11 @@ router.get(
   categoryController.getCategories
 );
 
+router.get(
+  "/top-categories",
+  categoryController.getTopCategories
+);
+
 router.post(
   "/create",
   categoryController.createCategories

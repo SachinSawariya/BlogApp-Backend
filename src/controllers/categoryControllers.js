@@ -9,6 +9,15 @@ const getCategories = asyncHandler(async (req, res) => {
   }
 });
 
+const getTopCategories = asyncHandler(async (req, res) => {
+  const result = await categoryService.getTopCategories();
+  if (result?.length > 0) {
+    return utils.successResponse(result, res);
+  } else {
+    return utils.recordNotFound(res, null);
+  }
+});
+
 const createCategories = asyncHandler(async (req, res) => {
   const date = req.body;
   const result = await categoryService.createCategories(date, res);
@@ -30,6 +39,7 @@ const createCategories = asyncHandler(async (req, res) => {
 
 module.exports = {
   getCategories,
+  getTopCategories,
   createCategories,
 //   getBlogList,
 };
