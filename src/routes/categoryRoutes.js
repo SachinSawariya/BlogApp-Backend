@@ -17,6 +17,11 @@ router.post(
   categoryController.createCategories
 );
 
+router.get(
+  "/:categorySlug/articles/titles",
+  categoryController.getArticleTitlesByCategory
+);
+
 // router.get("/get-sections", blogController.getSections);
 
 module.exports = router;

@@ -83,8 +83,40 @@ const createCategories = async (data, res) => {
   }
 };
 
+const getArticleTitlesByCategory = async (req, res) => {
+  try {
+    const { Blog, Category } = global.connections.models;
+    const { categorySlug } = req.params;
+
+    // Find category by slug
+    const category = await Category.findOne({ slug: categorySlug });
+    if (!category) {
+      return null;
+    }
+
+    // Get articles with only title and slug for this category
+    const articles = await Blog.find({ categoryId: category._id })
+      .sort({ createdAt: -1 })
+      .select('title slug') // Only select title and slug fields
+      .lean(); // Convert to plain JavaScript objects
+
+    return {
+      category: {
+        id: category._id,
+        name: category.name,
+        slug: category.slug
+      },
+      articles: articles
+    };
+  } catch (error) {
+    logger.error("Error while fetching article titles by category ->", error);
+    throw new Error(error.message);
+  }
+};
+
 module.exports = {
   createCategories,
   getCategories,
-  getTopCategories
+  getTopCategories,
+  getArticleTitlesByCategory
 };

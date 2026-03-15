@@ -40,9 +40,30 @@ const getArticlesByCategory = asyncHandler(async (req, res) => {
   }
 });
 
+const getArticleBySlug = asyncHandler(async (req, res) => {
+  const result = await blogSevice.getArticleBySlug(req, res);
+  if (result) {
+    return utils.successResponse(result, res);
+  } else {
+    return utils.recordNotFound(res, "Article not found");
+  }
+});
+
+const createBlog = asyncHandler(async (req, res) => {
+  const result = await blogSevice.createBlog(req, res);
+  if (result) {
+    res.message = "Blog created successfully";
+    return utils.createdDocumentResponse(result, res);
+  } else {
+    return utils.failureResponse("Failed to create blog", res);
+  }
+});
+
 module.exports = {
   getSections,
   getFeaturedArticles,
   getBlogList,
   getArticlesByCategory,
+  getArticleBySlug,
+  createBlog
 };

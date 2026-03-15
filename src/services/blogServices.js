@@ -196,9 +196,90 @@ const getArticlesByCategory = async (req, res) => {
   }
 };
 
+const getArticleBySlug = async (req, res) => {
+  try {
+    const { Blog, Category } = global.connections.models;
+    const { slug } = req.params;
+
+    // Find article by slug and populate category
+    const article = await Blog.findOne({ slug })
+      .populate('categoryId', 'name slug');
+
+    if (!article) {
+      return null;
+    }
+
+    // Increment view count
+    await Blog.findByIdAndUpdate(article._id, { $inc: { views: 1 } });
+
+    // Return article data with all necessary fields for description page
+    return {
+      id: article._id,
+      title: article.title,
+      slug: article.slug,
+      content: article.content,
+      coverImage: article.coverImage,
+      authorName: article.authorName,
+      authorAvatar: article.authorAvatar,
+      views: article.views + 1, // Include the incremented view count
+      likes: article.likes,
+      readTime: article.readTime,
+      section: article.section,
+      createdAt: article.createdAt,
+      updatedAt: article.updatedAt,
+      category: article.categoryId,
+      tags: article.tags,
+      authorId: article.authorId,
+      status: article.status
+    };
+  } catch (error) {
+    logger.error("Error while fetching article by slug ->", error);
+    throw new Error(error.message);
+  }
+};
+
+const createBlog = async (req, res) => {
+  try {
+    const { Blog, Category } = global.connections.models;
+    const { title, slug, content, coverImage, categoryId, authorName, authorAvatar, section, tags, readTime } = req.body;
+
+    // Check if category exists
+    const category = await Category.findById(categoryId);
+    if (!category) {
+      throw new Error("Category not found");
+    }
+
+    const newBlog = new Blog({
+      title,
+      slug,
+      content,
+      coverImage,
+      categoryId,
+      authorName,
+      authorAvatar,
+      section: section || "Regular",
+      tags: tags || [],
+      readTime: readTime || 5,
+      status: "published",
+    });
+
+    const savedBlog = await newBlog.save();
+
+    // Increment category article count
+    await Category.findByIdAndUpdate(categoryId, { $inc: { articlesCount: 1 } });
+
+    return savedBlog;
+  } catch (error) {
+    logger.error("Error while creating blog ->", error);
+    throw new Error(error.message);
+  }
+};
+
 module.exports = {
   getAllBlogs,
   getAllSections,
   getFeaturedArticles,
-  getArticlesByCategory
+  getArticlesByCategory,
+  getArticleBySlug,
+  createBlog
 };
