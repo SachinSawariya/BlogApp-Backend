@@ -4,6 +4,7 @@ const authMiddleware = require("../middleware/authMiddleware");
 const router = express.Router();
 
 router.get("/get-sections", blogController.getSections);
+router.get("/all-articles", blogController.getBlogList);
 router.get("/featured-articles", blogController.getFeaturedArticles);
 router.get("/articles/:categorySlug", blogController.getArticlesByCategory);
 router.get("/article/:slug", blogController.getArticleBySlug);
