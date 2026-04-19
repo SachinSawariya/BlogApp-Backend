@@ -7,7 +7,7 @@ const getSections = asyncHandler(async (req, res) => {
   if (result?.length > 0) {
     return utils.successResponse(result, res);
   } else {
-    return utils.recordNotFound(res, null);
+    return utils.recordNotFound(res, []);
   }
 });
 
@@ -16,7 +16,7 @@ const getFeaturedArticles = asyncHandler(async (req, res) => {
   if (result?.length > 0) {
     return utils.successResponse(result, res);
   } else {
-    return utils.recordNotFound(res, null);
+    return utils.recordNotFound(res, []);
   }
 });
 
