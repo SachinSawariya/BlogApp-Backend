@@ -3,9 +3,7 @@ const config = require('./config/config.js')
 const connectDB = require('./config/db.js')
 const dotenv = require('dotenv')
 
-dotenv.config({
-    path: './env'
-});
+dotenv.config();
 
 connectDB()
 .then(async () => {

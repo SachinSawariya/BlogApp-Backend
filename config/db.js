@@ -5,7 +5,6 @@ const modelCreator = require("../src/services/modelCreator.js");
 const connectDB = async () => {
     try {
         const dbName = config.SERVER.DB_NAME;
-        console.log("dbName ", config.SERVER.DB_URI)
 
         // Ensure global clientDBConnections is initialized
         if (!global.clientDBConnections) {
