@@ -4,10 +4,11 @@ const connectDB = require('./config/db.js')
 const dotenv = require('dotenv')
 
 dotenv.config();
+const PORT = process.env.PORT || 4000;
 
 connectDB()
 .then(async () => {
-    app.listen(config.PORT || 4000, ()=>{
+    app.listen(PORT || 4000, ()=>{
         logger.info(`Server is running on port ${config.PORT}`)
     })  
 })
