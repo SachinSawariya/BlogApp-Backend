@@ -3,7 +3,7 @@ const config = require('./config/config.js')
 const connectDB = require('./config/db.js')
 const dotenv = require('dotenv')
 
-dotenv.config();
+// dotenv.config();
 const PORT = process.env.PORT || 4000;
 
 connectDB()

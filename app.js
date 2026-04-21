@@ -1,8 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const dotenv = require("dotenv");
-dotenv.config();
+// const dotenv = require("dotenv");
+// dotenv.config();
 const config = require("./config/config");
 const asyncHandler = require("./src/utils/asyncHandler.js");
 const utils = require('./src/utils/responseMsg.js')
