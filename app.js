@@ -13,15 +13,10 @@ global.logger = require('./src/utils/logger');
 global.asyncHandler = asyncHandler;
 global.utils = utils;
 
-console.log("----------1st-------------")
-
 const corsOpts = {
   origin: config.CORS_ORIGIN || "*",
   credentials: true,
 };
-
-
-console.log("----------2nd-------------")
 
 app.use(cors(corsOpts));
 app.use(express.json({}));
@@ -29,19 +24,13 @@ app.use(express.urlencoded({ extended: true, limit: "1gb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
-console.log("----------3rd-------------")
-
-app.get("/", (req, res)=> res.send("Server is running"))
-// app.use("/", require('./src/routes/index.js'));
-
-console.log("----------4th-------------")
+app.get("/ping", (req, res)=> res.send("Pong"))
+app.use("/", require('./src/routes/index.js'));
 
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
   process.exit(1);
 });
-
-console.log("----------5th-------------")
 
 module.exports = {
   app,
