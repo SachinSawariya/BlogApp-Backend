@@ -3,9 +3,13 @@ const getAllSections = async (req, res) => {
     const { Blog } = global.connections.models;
 
     const sections = await Blog.aggregate([
+      // 0️⃣ Filter only published articles
+      {
+        $match: { status: "published" },
+      },
       // 1️⃣ Sort by latest first
       {
-        $sort: { createdAt: -1 }
+        $sort: { createdAt: -1 },
       },
 
       // 2️⃣ Add row number per category
@@ -14,14 +18,14 @@ const getAllSections = async (req, res) => {
           partitionBy: "$categoryId",
           sortBy: { createdAt: -1 },
           output: {
-            rank: { $documentNumber: {} }
-          }
-        }
+            rank: { $documentNumber: {} },
+          },
+        },
       },
 
       // 3️⃣ Keep only latest 3 per category
       {
-        $match: { rank: { $lte: 3 } }
+        $match: { rank: { $lte: 3 } },
       },
 
       // 4️⃣ Lookup category
@@ -30,8 +34,8 @@ const getAllSections = async (req, res) => {
           from: "categories",
           localField: "categoryId",
           foreignField: "_id",
-          as: "category"
-        }
+          as: "category",
+        },
       },
 
       { $unwind: "$category" },
@@ -52,19 +56,19 @@ const getAllSections = async (req, res) => {
               readTime: "$readTime",
               section: "$section",
               createdAt: "$createdAt",
-              content: "$content"
-            }
-          }
-        }
+              content: "$content",
+            },
+          },
+        },
       },
 
       {
         $project: {
           _id: 0,
           category: "$_id",
-          articles: 1
-        }
-      }
+          articles: 1,
+        },
+      },
     ]);
 
     return sections;
@@ -77,43 +81,52 @@ const getAllSections = async (req, res) => {
 const getFeaturedArticles = async (req, res) => {
   try {
     const { Blog, Category } = global.connections.models;
-    
+
     // Get featured articles (latest 8 articles across all categories)
     const featuredArticles = await Blog.aggregate([
+      // 0️⃣ Filter only published articles
+      {
+        $match: { status: "published" },
+      },
       // 1️⃣ Sort by latest first and likes (for better featured selection)
       {
         $addFields: {
           score: {
             $add: [
               { $multiply: ["$likes", 2] }, // Likes weighted more
-              { $divide: [{ $subtract: [new Date(), "$createdAt"] }, 1000 * 60 * 60 * 24] } // Recency factor
-            ]
-          }
-        }
+              {
+                $divide: [
+                  { $subtract: [new Date(), "$createdAt"] },
+                  1000 * 60 * 60 * 24,
+                ],
+              }, // Recency factor
+            ],
+          },
+        },
       },
-      
+
       // 2️⃣ Sort by score (likes + recency)
       {
-        $sort: { score: -1, createdAt: -1 }
+        $sort: { score: -1, createdAt: -1 },
       },
-      
+
       // 3️⃣ Limit to 8 articles
       {
-        $limit: 8
+        $limit: 8,
       },
-      
+
       // 4️⃣ Lookup category
       {
         $lookup: {
           from: "categories",
           localField: "categoryId",
           foreignField: "_id",
-          as: "category"
-        }
+          as: "category",
+        },
       },
-      
+
       { $unwind: "$category" },
-      
+
       // 5️⃣ Project final structure
       {
         $project: {
@@ -126,9 +139,9 @@ const getFeaturedArticles = async (req, res) => {
           imageUrl: "$coverImage",
           likes: 1,
           createdAt: 1,
-          views: 1
-        }
-      }
+          views: 1,
+        },
+      },
     ]);
 
     return featuredArticles;
@@ -142,7 +155,7 @@ const getAllBlogs = async (req, res) => {
   try {
     const { Blog } = global.connections.models;
 
-    const users = await Blog.find({});
+    const users = await Blog.find({ status: "published" });
 
     return users;
   } catch (error) {
@@ -166,14 +179,20 @@ const getArticlesByCategory = async (req, res) => {
     }
 
     // Get total count for pagination
-    const totalCount = await Blog.countDocuments({ categoryId: category._id });
+    const totalCount = await Blog.countDocuments({
+      categoryId: category._id,
+      status: "published",
+    });
 
     // Get paginated articles
-    const articles = await Blog.find({ categoryId: category._id })
+    const articles = await Blog.find({
+      categoryId: category._id,
+      status: "published",
+    })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate('categoryId', 'name slug');
+      .populate("categoryId", "name slug");
 
     return {
       articles,
@@ -182,13 +201,13 @@ const getArticlesByCategory = async (req, res) => {
         totalPages: Math.ceil(totalCount / limit),
         totalArticles: totalCount,
         hasNextPage: page < Math.ceil(totalCount / limit),
-        hasPreviousPage: page > 1
+        hasPreviousPage: page > 1,
       },
       category: {
         id: category._id,
         name: category.name,
-        slug: category.slug
-      }
+        slug: category.slug,
+      },
     };
   } catch (error) {
     logger.error("Error while fetching articles by category ->", error);
@@ -202,8 +221,10 @@ const getArticleBySlug = async (req, res) => {
     const { slug } = req.params;
 
     // Find article by slug and populate category
-    const article = await Blog.findOne({ slug })
-      .populate('categoryId', 'name slug');
+    const article = await Blog.findOne({ slug, status: "published" }).populate(
+      "categoryId",
+      "name slug",
+    );
 
     if (!article) {
       return null;
@@ -230,7 +251,7 @@ const getArticleBySlug = async (req, res) => {
       category: article.categoryId,
       tags: article.tags,
       authorId: article.authorId,
-      status: article.status
+      status: article.status,
     };
   } catch (error) {
     logger.error("Error while fetching article by slug ->", error);
@@ -241,7 +262,19 @@ const getArticleBySlug = async (req, res) => {
 const createBlog = async (req, res) => {
   try {
     const { Blog, Category } = global.connections.models;
-    const { title, slug, content, coverImage, categoryId, authorName, authorAvatar, section, tags, readTime } = req.body;
+    const {
+      title,
+      slug,
+      content,
+      coverImage,
+      categoryId,
+      authorName,
+      authorAvatar,
+      section,
+      tags,
+      readTime,
+      status,
+    } = req.body;
 
     // Check if category exists
     const category = await Category.findById(categoryId);
@@ -260,17 +293,126 @@ const createBlog = async (req, res) => {
       section: section || "Regular",
       tags: tags || [],
       readTime: readTime || 5,
-      status: "published",
+      status: status || "published",
     });
 
     const savedBlog = await newBlog.save();
 
     // Increment category article count
-    await Category.findByIdAndUpdate(categoryId, { $inc: { articlesCount: 1 } });
+    await Category.findByIdAndUpdate(categoryId, {
+      $inc: { articlesCount: 1 },
+    });
 
     return savedBlog;
   } catch (error) {
     logger.error("Error while creating blog ->", error);
+    throw new Error(error.message);
+  }
+};
+
+const getAdminBlogList = async (req, res) => {
+  try {
+    const { Blog } = global.connections.models;
+    // Admins see everything, sorted by latest
+    const blogs = await Blog.find({})
+      .sort({ createdAt: -1 })
+      .populate('categoryId', 'name slug');
+    return blogs;
+  } catch (error) {
+    logger.error("Error while fetching admin blog list ->", error);
+    throw new Error(error.message);
+  }
+};
+
+const updateBlog = async (req, res) => {
+  try {
+    const { Blog, Category } = global.connections.models;
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const oldBlog = await Blog.findById(id);
+    if (!oldBlog) {
+      throw new Error("Article not found");
+    }
+
+    // Handle category count changes if category is updated
+    if (updateData.categoryId && updateData.categoryId !== oldBlog.categoryId.toString()) {
+      // Decrement old
+      await Category.findByIdAndUpdate(oldBlog.categoryId, { $inc: { articlesCount: -1 } });
+      // Increment new
+      await Category.findByIdAndUpdate(updateData.categoryId, { $inc: { articlesCount: 1 } });
+    }
+
+    if (updateData.tags && typeof updateData.tags === 'string') {
+        updateData.tags = updateData.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+    }
+
+    const updatedBlog = await Blog.findByIdAndUpdate(
+      id,
+      { ...updateData },
+      { new: true }
+    );
+
+    return updatedBlog;
+  } catch (error) {
+    logger.error("Error while updating blog ->", error);
+    throw new Error(error.message);
+  }
+};
+
+const deleteBlog = async (req, res) => {
+  try {
+    const { Blog, Category } = global.connections.models;
+    const { id } = req.params;
+
+    const blog = await Blog.findById(id);
+    if (!blog) {
+      throw new Error("Article not found");
+    }
+
+    await Blog.findByIdAndDelete(id);
+
+    // Decrement category article count
+    await Category.findByIdAndUpdate(blog.categoryId, { $inc: { articlesCount: -1 } });
+
+    return { message: "Article deleted successfully" };
+  } catch (error) {
+    logger.error("Error while deleting blog ->", error);
+    throw new Error(error.message);
+  }
+};
+
+const getAdminArticleBySlug = async (req, res) => {
+  try {
+    const { Blog, Category } = global.connections.models;
+    const { slug } = req.params;
+
+    const article = await Blog.findOne({ slug }).populate('categoryId', 'name slug');
+
+    if (!article) {
+      return null;
+    }
+
+    return {
+      id: article._id,
+      title: article.title,
+      slug: article.slug,
+      content: article.content,
+      coverImage: article.coverImage,
+      authorName: article.authorName,
+      authorAvatar: article.authorAvatar,
+      views: article.views,
+      likes: article.likes,
+      readTime: article.readTime,
+      section: article.section,
+      createdAt: article.createdAt,
+      updatedAt: article.updatedAt,
+      category: article.categoryId,
+      tags: article.tags,
+      status: article.status
+    };
+  } catch (error) {
+    logger.error("Error while fetching admin article by slug ->", error);
     throw new Error(error.message);
   }
 };
@@ -281,5 +423,9 @@ module.exports = {
   getFeaturedArticles,
   getArticlesByCategory,
   getArticleBySlug,
-  createBlog
+  getAdminBlogList,
+  getAdminArticleBySlug,
+  updateBlog,
+  deleteBlog,
+  createBlog,
 };

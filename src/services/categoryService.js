@@ -14,41 +14,48 @@ const getCategories = async () => {
 const getTopCategories = async () => {
   try {
     const { Category, Blog } = global.connections.models;
-    
+
     // Get categories with article counts, sorted by count (descending), limited to 5
     const categories = await Category.aggregate([
       {
         $lookup: {
           from: "blogs",
-          localField: "_id",
-          foreignField: "categoryId",
-          as: "articles"
-        }
+          let: { catId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$categoryId", "$$catId"] },
+                status: "published",
+              },
+            },
+          ],
+          as: "articles",
+        },
       },
       {
         $addFields: {
-          articleCount: { $size: "$articles" }
-        }
+          articleCount: { $size: "$articles" },
+        },
       },
       {
         $match: {
-          articleCount: { $gt: 0 } // Only include categories with articles
-        }
+          articleCount: { $gt: 0 }, // Only include categories with articles
+        },
       },
       {
-        $sort: { articleCount: -1 } // Sort by article count descending
+        $sort: { articleCount: -1 }, // Sort by article count descending
       },
       {
-        $limit: 5 // Limit to top 5 categories
+        $limit: 5, // Limit to top 5 categories
       },
       {
         $project: {
           name: 1,
           slug: 1,
           articleCount: 1,
-          _id: 1
-        }
-      }
+          _id: 1,
+        },
+      },
     ]);
 
     return categories;
@@ -95,18 +102,21 @@ const getArticleTitlesByCategory = async (req, res) => {
     }
 
     // Get articles with only title and slug for this category
-    const articles = await Blog.find({ categoryId: category._id })
+    const articles = await Blog.find({
+      categoryId: category._id,
+      status: "published",
+    })
       .sort({ createdAt: -1 })
-      .select('title slug') // Only select title and slug fields
+      .select("title slug") // Only select title and slug fields
       .lean(); // Convert to plain JavaScript objects
 
     return {
       category: {
         id: category._id,
         name: category.name,
-        slug: category.slug
+        slug: category.slug,
       },
-      articles: articles
+      articles: articles,
     };
   } catch (error) {
     logger.error("Error while fetching article titles by category ->", error);
@@ -118,5 +128,5 @@ module.exports = {
   createCategories,
   getCategories,
   getTopCategories,
-  getArticleTitlesByCategory
+  getArticleTitlesByCategory,
 };

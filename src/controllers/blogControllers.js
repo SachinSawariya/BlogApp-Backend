@@ -59,11 +59,53 @@ const createBlog = asyncHandler(async (req, res) => {
   }
 });
 
+const getAdminBlogList = asyncHandler(async (req, res) => {
+  const result = await blogSevice.getAdminBlogList(req, res);
+  if (result?.length >= 0) {
+    return utils.successResponse(result, res);
+  } else {
+    return utils.failureResponse("Failed to fetch articles", res);
+  }
+});
+
+const updateBlog = asyncHandler(async (req, res) => {
+  const result = await blogSevice.updateBlog(req, res);
+  if (result) {
+    res.message = "Article updated successfully";
+    return utils.successResponse(result, res);
+  } else {
+    return utils.failureResponse("Failed to update article", res);
+  }
+});
+
+const deleteBlog = asyncHandler(async (req, res) => {
+  const result = await blogSevice.deleteBlog(req, res);
+  if (result) {
+    res.message = "Article deleted successfully";
+    return utils.successResponse(result, res);
+  } else {
+    return utils.failureResponse("Failed to delete article", res);
+  }
+});
+
+const getAdminArticleBySlug = asyncHandler(async (req, res) => {
+  const result = await blogSevice.getAdminArticleBySlug(req, res);
+  if (result) {
+    return utils.successResponse(result, res);
+  } else {
+    return utils.recordNotFound(res, "Article not found");
+  }
+});
+
 module.exports = {
   getSections,
   getFeaturedArticles,
   getBlogList,
+  getAdminBlogList,
+  getAdminArticleBySlug,
   getArticlesByCategory,
   getArticleBySlug,
+  updateBlog,
+  deleteBlog,
   createBlog
 };
