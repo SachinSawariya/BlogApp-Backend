@@ -155,7 +155,9 @@ const getAllBlogs = async (req, res) => {
   try {
     const { Blog } = global.connections.models;
 
-    const users = await Blog.find({ status: "published" });
+    const users = await Blog.find({ status: "published" })
+      .populate("categoryId", "name slug")
+      .select("-content -authorAvatar");
 
     return users;
   } catch (error) {
@@ -417,11 +419,72 @@ const getAdminArticleBySlug = async (req, res) => {
   }
 };
 
+const getArticlesByTag = async (req, res) => {
+  try {
+    const { Blog } = global.connections.models;
+    const { tag } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Get total count for pagination
+    const totalCount = await Blog.countDocuments({
+      tags: { $elemMatch: { $regex: new RegExp(`^${tag}$`, "i") } },
+      status: "published",
+    });
+
+    // Get paginated articles
+    const articles = await Blog.find({
+      tags: { $elemMatch: { $regex: new RegExp(`^${tag}$`, "i") } },
+      status: "published",
+    })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("categoryId", "name slug");
+
+    console.log("articles", articles);
+
+    // Extract the original casing of the tag from the results
+    let displayTag = tag;
+    if (articles.length > 0) {
+      // Look through all articles to find the best casing match
+      for (const article of articles) {
+        if (article.tags && Array.isArray(article.tags)) {
+          const foundTag = article.tags.find(
+            (t) => typeof t === 'string' && t.trim().toLowerCase() === tag.trim().toLowerCase()
+          );
+          if (foundTag) {
+            displayTag = foundTag.trim();
+            break; 
+          }
+        }
+      }
+    }
+
+    return {
+      articles,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / limit),
+        totalArticles: totalCount,
+        hasNextPage: page < Math.ceil(totalCount / limit),
+        hasPreviousPage: page > 1,
+      },
+      tag: displayTag,
+    };
+  } catch (error) {
+    logger.error("Error while fetching articles by tag ->", error);
+    throw new Error(error.message);
+  }
+};
+
 module.exports = {
   getAllBlogs,
   getAllSections,
   getFeaturedArticles,
   getArticlesByCategory,
+  getArticlesByTag,
   getArticleBySlug,
   getAdminBlogList,
   getAdminArticleBySlug,

@@ -97,6 +97,15 @@ const getAdminArticleBySlug = asyncHandler(async (req, res) => {
   }
 });
 
+const getArticlesByTag = asyncHandler(async (req, res) => {
+  const result = await blogSevice.getArticlesByTag(req, res);
+  if (result?.articles?.length > 0) {
+    return utils.successResponse(result, res);
+  } else {
+    return utils.recordNotFound(res, "No articles found for this tag");
+  }
+});
+
 module.exports = {
   getSections,
   getFeaturedArticles,
@@ -104,6 +113,7 @@ module.exports = {
   getAdminBlogList,
   getAdminArticleBySlug,
   getArticlesByCategory,
+  getArticlesByTag,
   getArticleBySlug,
   updateBlog,
   deleteBlog,
