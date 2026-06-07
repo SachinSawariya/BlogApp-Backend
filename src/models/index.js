@@ -1,6 +1,7 @@
 const { blogSchema } = require('./blogModel.js');
 const { categorySchema } = require('./categoryModel.js')
 const { userSchema } = require('./userModel.js')
+const { contactSchema } = require('./contactModel.js')
 
 const schemas = [
     {
@@ -11,6 +12,9 @@ const schemas = [
     },
     {
         model: "User", schema: userSchema, collection: "users"
+    },
+    {
+        model: "Contact", schema: contactSchema, collection: "contacts"
     }
 ];
 
