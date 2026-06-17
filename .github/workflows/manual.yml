@@ -1,4 +1,6 @@
 name: Grant Tenant Credits
+run-name: >
+  Grant Credits - ${{ inputs.grants }} by (${{ github.actor }})
 
 on:
   workflow_dispatch:
