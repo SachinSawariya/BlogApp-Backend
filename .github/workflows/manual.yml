@@ -1,16 +1,28 @@
 name: Grant Tenant Credits
+
 run-name: >
-  Grant Credits - ${{ inputs.grants }} by (${{ github.actor }})
+  Grant ${{ inputs.credits }} credits to ${{ inputs.email }} with Expiry Date ${{ inputs.expiryDate }}
+
+concurrency:
+  group: grant-tenant-credits
+  cancel-in-progress: false
 
 on:
   workflow_dispatch:
     inputs:
-      grants:
-        description: >
-          JSON array of grants.
-          Example:
-          [{"email":"issuer@example.com","credits":100, expiryDate: 2026-12-01}]
+      email:
+        description: Tenant email
         required: true
+        type: string
+
+      credits:
+        description: Credits to grant
+        required: true
+        type: number
+
+      expiryDate:
+        description: Expiry date (YYYY-MM-DD)
+        required: false
         type: string
 
       dryRun:
@@ -19,9 +31,13 @@ on:
         default: true
         type: boolean
 
+permissions:
+  contents: read
+
 jobs:
   grant-tenant-credits:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     environment: production
 
@@ -33,6 +49,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
 
       - name: Install Dependencies
         run: npm ci
@@ -40,7 +57,10 @@ jobs:
       - name: Grant Credits
         env:
           MONGO_URL: ${{ secrets.MONGO_URL }}
-          GRANTS: ${{ inputs.grants }}
+          EMAIL: ${{ inputs.email }}
+          CREDITS: ${{ inputs.credits }}
+          EXPIRY_DATE: ${{ inputs.expiryDate }}
           DRY_RUN: ${{ inputs.dryRun }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
         run: npm run grant-tenant-credits
-
