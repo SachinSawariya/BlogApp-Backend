@@ -271,6 +271,39 @@ const getArticleBySlug = async (req, res) => {
   }
 };
 
+const getArticleSEO = async (req, res) => {
+  try {
+    const { Blog, Seo } = global.connections.models;
+    const { slug } = req.params;
+
+    // Find article by slug (only published or any for admin)
+    const article = await Blog.findOne({ slug });
+
+    if (!article) {
+      return null;
+    }
+
+    // Fetch associated SEO data
+    const seo = await Seo.findOne({ blogId: article._id });
+
+    // Return only SEO-related data
+    return {
+      id: article._id,
+      title: article.title,
+      slug: article.slug,
+      seoTitle: seo?.seoTitle || '',
+      seoDescription: seo?.seoDescription || '',
+      seoKeywords: seo?.seoKeywords || '',
+      seoCanonicalUrl: seo?.seoCanonicalUrl || '',
+      seoAuthor: seo?.seoAuthor || '',
+      seoOgImage: seo?.seoOgImage || '',
+    };
+  } catch (error) {
+    logger.error("Error while fetching article SEO data ->", error);
+    throw new Error(error.message);
+  }
+};
+
 const createBlog = async (req, res) => {
   try {
     const { Blog, Category } = global.connections.models;
@@ -531,6 +564,7 @@ module.exports = {
   getArticlesByCategory,
   getArticlesByTag,
   getArticleBySlug,
+  getArticleSEO,
   getAdminBlogList,
   getAdminArticleBySlug,
   updateBlog,

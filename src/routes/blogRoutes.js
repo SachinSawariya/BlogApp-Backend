@@ -9,6 +9,7 @@ router.get("/featured-articles", blogController.getFeaturedArticles);
 router.get("/articles/:categorySlug", blogController.getArticlesByCategory);
 router.get("/tag/:tag", blogController.getArticlesByTag);
 router.get("/article/:slug", blogController.getArticleBySlug);
+router.get("/article-seo/:slug", authMiddleware, blogController.getArticleSEO);
 
 // Admin routes
 router.post("/", authMiddleware, blogController.createBlog);

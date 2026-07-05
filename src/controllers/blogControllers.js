@@ -106,6 +106,15 @@ const getArticlesByTag = asyncHandler(async (req, res) => {
   }
 });
 
+const getArticleSEO = asyncHandler(async (req, res) => {
+  const result = await blogSevice.getArticleSEO(req, res);
+  if (result) {
+    return utils.successResponse(result, res);
+  } else {
+    return utils.recordNotFound(res, "Article not found");
+  }
+});
+
 module.exports = {
   getSections,
   getFeaturedArticles,
@@ -115,6 +124,7 @@ module.exports = {
   getArticlesByCategory,
   getArticlesByTag,
   getArticleBySlug,
+  getArticleSEO,
   updateBlog,
   deleteBlog,
   createBlog
