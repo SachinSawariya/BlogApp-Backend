@@ -219,7 +219,7 @@ const getArticlesByCategory = async (req, res) => {
 
 const getArticleBySlug = async (req, res) => {
   try {
-    const { Blog, Category } = global.connections.models;
+    const { Blog, Seo } = global.connections.models;
     const { slug } = req.params;
 
     // Find article by slug and populate category
@@ -234,6 +234,9 @@ const getArticleBySlug = async (req, res) => {
 
     // Increment view count
     await Blog.findByIdAndUpdate(article._id, { $inc: { views: 1 } });
+
+    // Fetch associated SEO data
+    const seo = await Seo.findOne({ blogId: article._id });
 
     // Return article data with all necessary fields for description page
     return {
@@ -254,6 +257,13 @@ const getArticleBySlug = async (req, res) => {
       tags: article.tags,
       authorId: article.authorId,
       status: article.status,
+      // Add SEO fields
+      seoTitle: seo?.seoTitle,
+      seoDescription: seo?.seoDescription,
+      seoKeywords: seo?.seoKeywords,
+      seoCanonicalUrl: seo?.seoCanonicalUrl,
+      seoAuthor: seo?.seoAuthor,
+      seoOgImage: seo?.seoOgImage,
     };
   } catch (error) {
     logger.error("Error while fetching article by slug ->", error);
@@ -349,11 +359,34 @@ const updateBlog = async (req, res) => {
         updateData.tags = updateData.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
     }
 
+    // Separate SEO data
+    const seoFields = ['seoTitle', 'seoDescription', 'seoKeywords', 'seoCanonicalUrl', 'seoAuthor', 'seoOgImage'];
+    const seoData = {};
+    let hasSeoData = false;
+    
+    seoFields.forEach(field => {
+      if (updateData[field] !== undefined) {
+        seoData[field] = updateData[field];
+        hasSeoData = true;
+        delete updateData[field]; // Remove from blog update
+      }
+    });
+
     const updatedBlog = await Blog.findByIdAndUpdate(
       id,
       { ...updateData },
       { new: true }
     );
+
+    // Update or create SEO document if SEO data was provided
+    if (hasSeoData) {
+      const { Seo } = global.connections.models;
+      await Seo.findOneAndUpdate(
+        { blogId: id },
+        { $set: seoData },
+        { upsert: true, new: true }
+      );
+    }
 
     return updatedBlog;
   } catch (error) {
@@ -364,7 +397,7 @@ const updateBlog = async (req, res) => {
 
 const deleteBlog = async (req, res) => {
   try {
-    const { Blog, Category } = global.connections.models;
+    const { Blog, Category, Seo } = global.connections.models;
     const { id } = req.params;
 
     const blog = await Blog.findById(id);
@@ -377,6 +410,9 @@ const deleteBlog = async (req, res) => {
     // Decrement category article count
     await Category.findByIdAndUpdate(blog.categoryId, { $inc: { articlesCount: -1 } });
 
+    // Delete associated SEO data
+    await Seo.findOneAndDelete({ blogId: id });
+
     return { message: "Article deleted successfully" };
   } catch (error) {
     logger.error("Error while deleting blog ->", error);
@@ -386,7 +422,7 @@ const deleteBlog = async (req, res) => {
 
 const getAdminArticleBySlug = async (req, res) => {
   try {
-    const { Blog, Category } = global.connections.models;
+    const { Blog, Seo } = global.connections.models;
     const { slug } = req.params;
 
     const article = await Blog.findOne({ slug }).populate('categoryId', 'name slug');
@@ -394,6 +430,8 @@ const getAdminArticleBySlug = async (req, res) => {
     if (!article) {
       return null;
     }
+
+    const seo = await Seo.findOne({ blogId: article._id });
 
     return {
       id: article._id,
@@ -411,7 +449,14 @@ const getAdminArticleBySlug = async (req, res) => {
       updatedAt: article.updatedAt,
       category: article.categoryId,
       tags: article.tags,
-      status: article.status
+      status: article.status,
+      // Add SEO fields
+      seoTitle: seo?.seoTitle,
+      seoDescription: seo?.seoDescription,
+      seoKeywords: seo?.seoKeywords,
+      seoCanonicalUrl: seo?.seoCanonicalUrl,
+      seoAuthor: seo?.seoAuthor,
+      seoOgImage: seo?.seoOgImage,
     };
   } catch (error) {
     logger.error("Error while fetching admin article by slug ->", error);
