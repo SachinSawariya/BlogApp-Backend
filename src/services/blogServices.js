@@ -61,7 +61,11 @@ const getAllSections = async (req, res) => {
           },
         },
       },
-
+      {
+        $sort: {
+          _id: 1,
+        },
+      },
       {
         $project: {
           _id: 0,
@@ -92,24 +96,23 @@ const getFeaturedArticles = async (req, res) => {
       {
         $addFields: {
           score: {
-            $add: [
-              { $multiply: ["$likes", 2] }, // Likes weighted more
+            $subtract: [
+              { $multiply: ["$likes", 2] },
               {
                 $divide: [
                   { $subtract: [new Date(), "$createdAt"] },
                   1000 * 60 * 60 * 24,
                 ],
-              }, // Recency factor
+              },
             ],
           },
         },
       },
-
-      // 2️⃣ Sort by score (likes + recency)
       {
-        $sort: { score: -1, createdAt: -1 },
+        $sort: {
+          score: -1,
+        },
       },
-
       // 3️⃣ Limit to 8 articles
       {
         $limit: 8,
