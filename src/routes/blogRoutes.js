@@ -17,6 +17,7 @@ router.get("/admin-articles", authMiddleware, blogController.getAdminBlogList);
 router.get("/admin-article/:slug", authMiddleware, blogController.getAdminArticleBySlug);
 router.put("/:id", authMiddleware, blogController.updateBlog);
 router.delete("/:id", authMiddleware, blogController.deleteBlog);
+router.post("/index-url", authMiddleware, blogController.indexUrl);
 
 
 module.exports = router;

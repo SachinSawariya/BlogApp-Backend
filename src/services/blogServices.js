@@ -1,3 +1,28 @@
+const triggerSitemapRevalidation = async () => {
+  try {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const revalidationSecret = process.env.REVALIDATION_SECRET;
+    
+    if (!revalidationSecret) {
+      logger.warn('REVALIDATION_SECRET not set, skipping sitemap revalidation');
+      return;
+    }
+
+    await fetch(`${frontendUrl}/api/revalidate-sitemap`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ secret: revalidationSecret }),
+    });
+
+    logger.info('Sitemap revalidation triggered successfully');
+  } catch (error) {
+    logger.error('Error triggering sitemap revalidation:', error);
+    // Don't throw error - main operation should succeed even if revalidation fails
+  }
+};
+
 const getAllSections = async (req, res) => {
   try {
     const { Blog } = global.connections.models;
@@ -351,6 +376,11 @@ const createBlog = async (req, res) => {
       $inc: { articlesCount: 1 },
     });
 
+    // Trigger sitemap revalidation for published articles
+    if (savedBlog.status === 'published') {
+      await triggerSitemapRevalidation();
+    }
+
     return savedBlog;
   } catch (error) {
     logger.error("Error while creating blog ->", error);
@@ -424,6 +454,11 @@ const updateBlog = async (req, res) => {
       );
     }
 
+    // Trigger sitemap revalidation if status changed to published or slug changed
+    if (updateData.status === 'published' || updateData.slug) {
+      await triggerSitemapRevalidation();
+    }
+
     return updatedBlog;
   } catch (error) {
     logger.error("Error while updating blog ->", error);
@@ -441,6 +476,10 @@ const deleteBlog = async (req, res) => {
       throw new Error("Article not found");
     }
 
+    // Construct the full URL for indexing
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const blogUrl = `${baseUrl}/articles/${blog.slug}`;
+
     await Blog.findByIdAndDelete(id);
 
     // Decrement category article count
@@ -448,6 +487,18 @@ const deleteBlog = async (req, res) => {
 
     // Delete associated SEO data
     await Seo.findOneAndDelete({ blogId: id });
+
+    // Trigger Google Indexing API with URL_DELETED
+    try {
+      const googleIndexingService = require('./googleIndexingService');
+      await googleIndexingService.indexUrl(blogUrl, 'URL_DELETED');
+    } catch (indexingError) {
+      logger.error('Error calling Google Indexing API on delete:', indexingError);
+      // Don't throw error - deletion should succeed even if indexing fails
+    }
+
+    // Trigger sitemap revalidation
+    await triggerSitemapRevalidation();
 
     return { message: "Article deleted successfully" };
   } catch (error) {

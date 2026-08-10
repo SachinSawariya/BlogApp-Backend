@@ -1,4 +1,5 @@
 const blogSevice = require("../services/blogServices");
+const googleIndexingService = require("../services/googleIndexingService");
 const asyncHandler = require("../utils/asyncHandler");
 const utils = require("../utils/responseMsg");
 
@@ -115,6 +116,26 @@ const getArticleSEO = asyncHandler(async (req, res) => {
   }
 });
 
+const indexUrl = asyncHandler(async (req, res) => {
+  const { url, type } = req.body;
+  
+  if (!url) {
+    return utils.failureResponse("URL is required", res);
+  }
+
+  if (!type || !['URL_UPDATED', 'URL_DELETED'].includes(type)) {
+    return utils.failureResponse("Type must be URL_UPDATED or URL_DELETED", res);
+  }
+
+  try {
+    const result = await googleIndexingService.indexUrl(url, type);
+    res.message = "URL indexing request sent to Google successfully";
+    return utils.successResponse(result, res);
+  } catch (error) {
+    return utils.failureResponse(error.message, res);
+  }
+});
+
 module.exports = {
   getSections,
   getFeaturedArticles,
@@ -127,5 +148,6 @@ module.exports = {
   getArticleSEO,
   updateBlog,
   deleteBlog,
-  createBlog
+  createBlog,
+  indexUrl
 };
