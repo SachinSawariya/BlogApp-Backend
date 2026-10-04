@@ -69,10 +69,21 @@ const indexUrl = async (
       );
     }
 
+    let normalizedUrl = url.trim();
+    if (normalizedUrl.includes('localhost') || normalizedUrl.includes('127.0.0.1')) {
+      const prodBase = process.env.PRODUCTION_URL || 'https://gyanvora.vercel.app';
+      try {
+        const parsed = new URL(normalizedUrl);
+        normalizedUrl = `${prodBase}${parsed.pathname}`;
+      } catch (e) {
+        normalizedUrl = `${prodBase}${normalizedUrl.startsWith('/') ? '' : '/'}${normalizedUrl}`;
+      }
+    }
+
     const client = await getAuthenticatedClient();
 
     const requestBody = {
-      url,
+      url: normalizedUrl,
       type,
     };
 
@@ -86,7 +97,7 @@ const indexUrl = async (
     });
 
     logger.info(
-      `Google Indexing API called successfully for ${type}: ${url}`
+      `Google Indexing API called successfully for ${type}: ${normalizedUrl}`
     );
 
     console.log(
