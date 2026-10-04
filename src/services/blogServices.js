@@ -1,4 +1,4 @@
-const triggerSitemapRevalidation = async () => {
+const triggerSitemapRevalidation = async (slug) => {
   try {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const revalidationSecret = process.env.REVALIDATION_SECRET;
@@ -13,10 +13,10 @@ const triggerSitemapRevalidation = async () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ secret: revalidationSecret }),
+      body: JSON.stringify({ secret: revalidationSecret, slug }),
     });
 
-    logger.info('Sitemap revalidation triggered successfully');
+    logger.info(`Sitemap revalidation triggered successfully${slug ? ` for ${slug}` : ''}`);
   } catch (error) {
     logger.error('Error triggering sitemap revalidation:', error);
     // Don't throw error - main operation should succeed even if revalidation fails
@@ -260,8 +260,10 @@ const getArticleBySlug = async (req, res) => {
       return null;
     }
 
-    // Increment view count
-    await Blog.findByIdAndUpdate(article._id, { $inc: { views: 1 } });
+    // Non-blocking asynchronous view count update
+    Blog.findByIdAndUpdate(article._id, { $inc: { views: 1 } })
+      .exec()
+      .catch((err) => logger.error("Async view increment error:", err));
 
     // Fetch associated SEO data
     const seo = await Seo.findOne({ blogId: article._id });
@@ -378,7 +380,7 @@ const createBlog = async (req, res) => {
 
     // Trigger sitemap revalidation for published articles
     if (savedBlog.status === 'published') {
-      await triggerSitemapRevalidation();
+      await triggerSitemapRevalidation(savedBlog.slug);
     }
 
     return savedBlog;
@@ -404,7 +406,7 @@ const getAdminBlogList = async (req, res) => {
 
 const updateBlog = async (req, res) => {
   try {
-    const { Blog, Category } = global.connections.models;
+    const { Blog, Category, Seo } = global.connections.models;
     const { id } = req.params;
     const updateData = req.body;
 
@@ -446,7 +448,6 @@ const updateBlog = async (req, res) => {
 
     // Update or create SEO document if SEO data was provided
     if (hasSeoData) {
-      const { Seo } = global.connections.models;
       await Seo.findOneAndUpdate(
         { blogId: id },
         { $set: seoData },
@@ -455,8 +456,8 @@ const updateBlog = async (req, res) => {
     }
 
     // Trigger sitemap revalidation if status changed to published or slug changed
-    if (updateData.status === 'published' || updateData.slug) {
-      await triggerSitemapRevalidation();
+    if (updateData.status === 'published' || updatedBlog.status === 'published' || updateData.slug) {
+      await triggerSitemapRevalidation(updatedBlog.slug);
     }
 
     return updatedBlog;
@@ -477,8 +478,8 @@ const deleteBlog = async (req, res) => {
     }
 
     // Construct the full URL for indexing
-    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const blogUrl = `${baseUrl}/articles/${blog.slug}`;
+    const prodBase = process.env.PRODUCTION_URL || 'https://gyanvora.vercel.app';
+    const blogUrl = `${prodBase}/articles/${blog.slug}`;
 
     await Blog.findByIdAndDelete(id);
 
@@ -498,7 +499,7 @@ const deleteBlog = async (req, res) => {
     }
 
     // Trigger sitemap revalidation
-    await triggerSitemapRevalidation();
+    await triggerSitemapRevalidation(blog.slug);
 
     return { message: "Article deleted successfully" };
   } catch (error) {
