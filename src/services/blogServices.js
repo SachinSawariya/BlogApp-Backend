@@ -1,3 +1,5 @@
+const { createTagMatcher, extractDisplayTag } = require('../utils/util');
+
 const triggerSitemapRevalidation = async (slug) => {
   try {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -560,15 +562,17 @@ const getArticlesByTag = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
+    const { decodedTag, tagRegex } = createTagMatcher(tag);
+
     // Get total count for pagination
     const totalCount = await Blog.countDocuments({
-      tags: { $elemMatch: { $regex: new RegExp(`^${tag}$`, "i") } },
+      tags: { $elemMatch: { $regex: tagRegex } },
       status: "published",
     });
 
     // Get paginated articles
     const articles = await Blog.find({
-      tags: { $elemMatch: { $regex: new RegExp(`^${tag}$`, "i") } },
+      tags: { $elemMatch: { $regex: tagRegex } },
       status: "published",
     })
       .sort({ createdAt: -1 })
@@ -576,27 +580,12 @@ const getArticlesByTag = async (req, res) => {
       .limit(limit)
       .populate("categoryId", "name slug");
 
-    console.log("articles", articles);
-
-    // Extract the original casing of the tag from the results
-    let displayTag = tag;
-    if (articles.length > 0) {
-      // Look through all articles to find the best casing match
-      for (const article of articles) {
-        if (article.tags && Array.isArray(article.tags)) {
-          const foundTag = article.tags.find(
-            (t) => typeof t === 'string' && t.trim().toLowerCase() === tag.trim().toLowerCase()
-          );
-          if (foundTag) {
-            displayTag = foundTag.trim();
-            break; 
-          }
-        }
-      }
-    }
+    // Extract the original casing of the tag from results or fallback
+    const displayTag = extractDisplayTag(articles, tagRegex, decodedTag);
 
     return {
       articles,
+      tag: displayTag,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(totalCount / limit),
@@ -604,7 +593,6 @@ const getArticlesByTag = async (req, res) => {
         hasNextPage: page < Math.ceil(totalCount / limit),
         hasPreviousPage: page > 1,
       },
-      tag: displayTag,
     };
   } catch (error) {
     logger.error("Error while fetching articles by tag ->", error);
